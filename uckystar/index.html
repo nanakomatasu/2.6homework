@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        height: 2000px;
+        display: flex;
+        flex-direction: column;
+      }
+      .top {
+        height: 200px;
+        text-align: center;
+        overflow: hidden;
+      }
+      button {
+        padding: 10px 20px;
+        font-size: 30px;
+        cursor: pointer;
+      }
+      .content {
+        flex: 1;
+        background-color: orange;
+        display: flex;
+      }
+      .content .left {
+        flex: 1;
+        background-color: skyblue;
+        padding: 10px;
+        box-sizing: border-box;
+      }
+      .content .item {
+        display: inline-block;
+        height: 30px;
+        border: 1px solid #000;
+        padding: 4px;
+        line-height: 30px;
+        border-radius: 10px;
+        transition: 0.3s;
+        cursor: pointer;
+        margin-right: 10px;
+      }
+      .content .item:hover {
+        box-shadow: 0 0 10px gray;
+        transform: translateY(-4px);
+        color: white;
+        font-weight: 900;
+      }
+
+      .content .right {
+        flex: 1;
+        background-color: pink;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="top">
+      <h2>抽奖</h2>
+      <button>开始</button>
+    </div>
+    <div class="content">
+      <div class="left">
+        <div class="item">某同学-0次</div>
+      </div>
+      <div class="right"></div>
+    </div>
+    <script src="./lib/echarts.min.js"></script>
+    <script src="./node_modules/axios/dist/axios.min.js"></script>
+    <script>
+      window.addEventListener("load", () => {
+        get();
+      });
+      async function get() {
+        const res = await axios.get("http://127.0.0.1:8848/api/students");
+        console.log(res.data);
+        document.querySelector(".left").innerHTML = res.data
+          .map((item) => {
+            return `<div class="item">${item.name}</div>`;
+          })
+          .join(" ");
+        var myChart = echarts.init(document.querySelector(".right"));
+        const option = {
+          xAxis: {
+            type: "value",
+          },
+          yAxis: {
+            type: "category",
+            data: res.data.map((item) => {
+              return item.name;
+            }),
+            inverse: true,
+          },
+          tooltip: {},
+          series: [
+            {
+              realtimeSort: true,
+              data: res.data.map((item) => {
+                return item.count;
+              }),
+              type: "bar",
+              showBackground: true,
+              backgroundStyle: {
+                color: "rgba(180, 180, 180, 0.2)",
+              },
+            },
+          ],
+        };
+
+        myChart.setOption(option);
+      }
+      document
+        .querySelector("button")
+        .addEventListener("click", async function () {
+          const res = await axios.get("http://127.0.0.1:8848/api/lucystar");
+          alert(`幸运学生${res.data.name}`);
+        });
+    </script>
+  </body>
+</html>
